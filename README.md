@@ -20,7 +20,7 @@ git clone https://github.com/sdtonnar/MScProject.git
 
 ## Usage
 
-It is necessary to run the function scripts prior to load libraries before running any part of the code:
+It is necessary to load the following libraries before running any part of the code:
 
 ```{r}
 library(sjPlot)
