@@ -1,0 +1,79 @@
+---
+title: "Building_Dataset"
+author: "Sarah Tonnar"
+date: "07/07/2023"
+output: html_document
+---
+
+***
+## Creating a Season and Day/Night column using timestamp
+***
+
+#### Lions
+
+```{r, include = FALSE}
+
+# Formatting a new column for month only for each data frame
+lion10$month <- format(lion10$timestamp, format = "%m")
+lion15$month <- format(lion15$timestamp, format = "%m")
+lion20$month <- format(lion20$timestamp, format = "%m")
+
+# Creating a new categorical column 'Season' based on month, using function I created called 'seasonFN'
+lion10$Season <- seasonFN(lion10)
+lion15$Season <- seasonFN(lion15)
+lion20$Season <- seasonFN(lion20)
+
+# Formatting a new column for time only for each data frame
+lion10$TOD <- format(lion10$timestamp, format = "%H%M")
+lion15$TOD <- format(lion15$timestamp, format = "%H%M")
+lion20$TOD <- format(lion20$timestamp, format = "%H%M")
+
+# Using the function I created called 'timecatFN' to create a categorical 'Day/Night'
+# based on Season and TOD columns created earlier
+lion10 <- timecatFN(lion10) # Lion 1:10
+lion15 <- timecatFN(lion15) # Lion 1:15
+lion20 <- timecatFN(lion20) # Lion 1:20
+
+# Dropping the separate month and TOD column as it is no longer needed
+drop <- c("month", "TOD")
+lion10 <- lion10[,!(names(lion10)%in%drop)]
+lion15 <- lion15[,!(names(lion15)%in%drop)]
+lion20 <- lion20[,!(names(lion20)%in%drop)]
+
+
+```
+
+
+#### Hyenas
+
+```{r, include = FALSE}
+
+# Formatting a new column for month only for each data frame
+hyena10$month <- format(hyena10$timestamp, format = "%m")
+hyena15$month <- format(hyena15$timestamp, format = "%m")
+hyena20$month <- format(hyena20$timestamp, format = "%m")
+
+# Creating a new categorical column 'Season' based on month, using function I created called 'seasonFN'
+hyena10$Season <- seasonFN(hyena10)
+hyena15$Season <- seasonFN(hyena15)
+hyena20$Season <- seasonFN(hyena20)
+
+# Formatting a new column for time only for each data frame
+hyena10$TOD <- format(hyena10$timestamp, format = "%H%M")
+hyena15$TOD <- format(hyena15$timestamp, format = "%H%M")
+hyena20$TOD <- format(hyena20$timestamp, format = "%H%M")
+
+# Using the function I created called 'timecatFN' to create a categorical 'Day/Night'
+# based on Season and TOD columns created earlier
+hyena10 <- timecatFN(hyena10) # Lion 1:10
+hyena15 <- timecatFN(hyena15) # Lion 1:15
+hyena20 <- timecatFN(hyena20) # Lion 1:20
+
+# Dropping the separate month and TOD column as it is no longer needed
+drop <- c("month", "TOD")
+hyena10 <- hyena10[,!(names(hyena10)%in%drop)]
+hyena15 <- hyena15[,!(names(hyena15)%in%drop)]
+hyena20 <- hyena20[,!(names(hyena20)%in%drop)]
+
+
+```
