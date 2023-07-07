@@ -1,0 +1,334 @@
+---
+title: "Hyena_Modelling"
+author: "Sarah Tonnar"
+date: "07/07/2023"
+output: html_document
+---
+
+## Hyena Models
+
+### Changing the class of the 'Presence' column
+```{r}
+hyena10$Presence <- as.integer(hyena10$Presence)
+hyena15$Presence <- as.integer(hyena15$Presence)
+hyena20$Presence <- as.integer(hyena20$Presence)
+```
+
+### Rescaling numeric variables around 0
+```{r}
+hyena10s <- hyena10
+hyena15s <- hyena15
+hyena20s <- hyena20
+
+# hyena 1:10
+hyena10s$dist_water <- scale(hyena10s$dist_water)
+hyena10s$dist_road <- scale(hyena10s$dist_road)
+hyena10s$dist_comp <- scale(hyena10s$dist_comp)
+
+# hyena 1:15
+hyena15s$dist_water <- scale(hyena15s$dist_water)
+hyena15s$dist_road <- scale(hyena15s$dist_road)
+hyena15s$dist_comp <- scale(hyena15s$dist_comp)
+
+# hyena 1:20
+hyena20s$dist_water <- scale(hyena20s$dist_water)
+hyena20s$dist_road <- scale(hyena20s$dist_road)
+hyena20s$dist_comp <- scale(hyena20s$dist_comp)
+```
+
+### Variables Only
+              
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:10
+hyena10mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena10s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:20
+hyena20mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena20s))
+```
+
+#### Removing dist_water from the model
+```{r}
+hyena10mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena10s))
+```
+
+```{r}
+hyena15mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+hyena20mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena20s))
+```
+
+```{r}
+lrtest(hyena10mod1, hyena10mod)
+lrtest(hyena15mod1, hyena15mod)
+lrtest(hyena20mod1, hyena20mod)
+
+# P < 0.05 - keep in model
+```
+
+#### Removing dist_road
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:10
+hyena10mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena10s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:20
+hyena20mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena20s))
+```
+
+```{r}
+lrtest(hyena10mod2, hyena10mod)
+lrtest(hyena15mod2, hyena15mod)
+lrtest(hyena20mod2, hyena20mod)
+
+# P > 0.05 - remove from model
+```
+
+#### Removing hab_type
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:10
+hyena10mod3 <- glmer(Presence ~ dist_water + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena10s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod3 <- glmer(Presence ~ dist_water + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:20
+hyena20mod3 <- glmer(Presence ~ dist_water + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(hyena20s))
+```
+
+```{r}
+lrtest(hyena15mod3, hyena15mod2) # P < 0.05 - keep in model
+```
+
+#### Removing dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:10
+hyena10mod4 <- glmer(Presence ~ dist_water + hab_type + (1|ID),
+                    family=binomial, data = na.omit(hyena10s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod4 <- glmer(Presence ~ dist_water + hab_type + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:20
+hyena20mod4 <- glmer(Presence ~ dist_water + hab_type + (1|ID),
+                    family=binomial, data = na.omit(hyena20s))
+```
+
+```{r}
+lrtest(hyena15mod4, hyena15mod2) # P > 0.05 - remove from model
+```
+
+## Adding interactions
+
+#### Adding Season:dist_water
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod5 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod4, hyena15mod5) # P < 0.05 - keep in model
+```
+
+#### Adding Season:dist_road
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod6 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + (1|ID),
+                    family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod5, hyena15mod6) # P < 0.05 - keep in model
+```
+
+#### Adding Season:hab_type
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod7 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + (1|ID), family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod6, hyena15mod7) # P < 0.05 - keep in model
+```
+
+#### Adding Season:dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod8 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + (1|ID), family=binomial, 
+                     data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod7, hyena15mod8) # P < 0.05 - keep in model
+```
+
+#### Adding DayNight:dist_water
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod9 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + (1|ID),
+                     family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod8, hyena15mod9) # P < 0.05 - keep in model
+```
+
+#### Adding DayNight:dist_road
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod10 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:dist_road +
+                        (1|ID),family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod9, hyena15mod10) # P > 0.05 - remove from model
+```
+
+#### Adding DayNight:hab_type
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod11 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       (1|ID), family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod9, hyena15mod11) # P < 0.05 - keep in model
+```
+
+#### Adding DayNight:dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod12 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + (1|ID), family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod11, hyena15mod12) # P < 0.05 - keep in model
+```
+
+#### Adding dist_water:dist_road
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod13 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + (1|ID), family=binomial, 
+                      data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod12, hyena15mod13) # P < 0.05 - keep in model
+```
+
+#### Adding dist_water:hab_type
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod14 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + dist_water:hab_type +
+                        (1|ID), family=binomial, data = na.omit(hyena15s))
+```
+```{r}
+lrtest(hyena15mod13, hyena15mod14) # P < 0.05 - keep in model
+```
+
+#### Adding dist_water:dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod15 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + dist_water:hab_type +
+                        dist_water:dist_comp + (1|ID), family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod14, hyena15mod15) # P < 0.05 - keep in model
+```
+
+#### Adding dist_road:hab_type
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod16 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + dist_water:hab_type +
+                        dist_water:dist_comp + dist_road:hab_type + (1|ID), family=binomial, 
+                      data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod15, hyena15mod16) # P > 0.05 - remove from model
+```
+
+#### Adding dist_road:dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod17 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + dist_water:hab_type +
+                        dist_water:dist_comp + dist_road:dist_comp + (1|ID), family=binomial, 
+                      data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod15, hyena15mod17) # P < 0.05 - keep in the model
+```
+
+#### Adding hab_type:dist_comp
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+hyena15mod18 <- glmer(Presence ~ dist_water + hab_type + Season:dist_water + Season:dist_road + 
+                       Season:hab_type + Season:dist_comp + DayNight:dist_water + DayNight:hab_type +
+                       DayNight:dist_comp + dist_water:dist_road + dist_water:hab_type +
+                        dist_water:dist_comp + dist_road:dist_comp + hab_type:dist_comp + (1|ID), 
+                      family=binomial, data = na.omit(hyena15s))
+```
+
+```{r}
+lrtest(hyena15mod17, hyena15mod18) # P < 0.05 - keep in the model
+```
+
+## Setting final model
+```{r}
+hyena.mod.final <- hyena15mod18
+```
