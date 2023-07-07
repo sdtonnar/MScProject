@@ -22,6 +22,7 @@ git clone https://github.com/sdtonnar/MScProject.git
 
 It is necessary to run the function scripts prior to load libraries before running any part of the code:
 
+```{r}
 library(sjPlot)
 library(ggplot2)
 library(sp)
@@ -38,6 +39,7 @@ library(Matrix)
 library(lme4)
 library(zoo)
 library(lmtest)
+```
 
 Then, it is recommended that the following functions are run before any other part of code:
 
