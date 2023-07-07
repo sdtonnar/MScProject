@@ -1,0 +1,312 @@
+---
+title: "Extractions"
+author: "Sarah Tonnar"
+date: "07/07/2023"
+output: html_document
+---
+
+#### Converting lion data frames to shapefiles
+```{r}
+# Lion 1:10
+coordinates(lion10) <- c("Easting", "Northing")
+proj4string(lion10) <- projection
+
+# Lion 1:15
+coordinates(lion15) <- c("Easting", "Northing")
+proj4string(lion15) <- projection
+
+# Lion 1:20
+coordinates(lion20) <- c("Easting", "Northing")
+proj4string(lion20) <- projection
+```
+
+#### Converting hyena data frames to shapefiles
+```{r}
+# Hyena 1:10
+coordinates(hyena10) <- c("Easting", "Northing")
+proj4string(hyena10) <- projection
+
+# Hyena 1:15
+coordinates(hyena15) <- c("Easting", "Northing")
+proj4string(hyena15) <- projection
+
+# Hyena 1:20
+coordinates(hyena20) <- c("Easting", "Northing")
+proj4string(hyena20) <- projection
+```
+
+***
+#### Extracting the distance to the nearest waterhole
+
+##### Creating a buffer
+```{r}
+# Creating a 50 metre buffer around waterholes
+water_buffer <- gBuffer(waterholes, byid=TRUE, width = 50)
+# Setting CRS
+proj4string(water_buffer) <- projection
+```
+
+##### Lion to waterhole
+```{r}
+# Creating a matrix of distances between observation points and the waterhole buffer
+w_dist10.l <- spDists(lion10, water_buffer) # 1:10
+w_dist15.l <- spDists(lion15, water_buffer) # 1:15
+w_dist20.l <- spDists(lion20, water_buffer) # 1:20
+
+# Creatng a new distance to waterhole column, applying distances generated in matrix
+lion10$dist_water <- apply(w_dist10.l, 1, min) # 1:10
+lion15$dist_water <- apply(w_dist15.l, 1, min) # 1:15
+lion20$dist_water <- apply(w_dist20.l, 1, min) # 1:20
+```
+
+##### Hyena to waterhole
+```{r}
+# Creating a matrix of distances between observation points and the waterhole buffer
+w_dist10.h <- spDists(hyena10, water_buffer) # 1:10
+w_dist15.h <- spDists(hyena15, water_buffer) # 1:15
+w_dist20.h <- spDists(hyena20, water_buffer) # 1:20
+
+# Creatng a new distance to waterhole column, applying distances generated in matrix
+hyena10$dist_water <- apply(w_dist10.h, 1, min) # 1:10
+hyena15$dist_water <- apply(w_dist15.h, 1, min) # 1:15
+hyena20$dist_water <- apply(w_dist20.h, 1, min) # 1:20
+```
+
+***
+#### Extracting the distance to the nearest road
+
+##### Creating a buffer
+```{r}
+# Creating a 10 metre buffer around roads
+road_buffer <- gBuffer(roads, byid=TRUE, width=10)
+# Setting CRS
+proj4string(road_buffer) <- projection
+```
+
+##### Lion to road
+```{r}
+# Creating a matrix of distances between observation points and the road buffer
+r_dist10.l <- spDists(lion10, road_buffer) # 1:10
+r_dist15.l <- spDists(lion15, road_buffer) # 1:15
+r_dist20.l <- spDists(lion20, road_buffer) # 1:20
+
+# Creatng a new distance to road column, applying distances generated in matrix
+lion10$dist_road <- apply(r_dist10.l, 1, min) # 1:10
+lion15$dist_road <- apply(r_dist15.l, 1, min) # 1:15
+lion20$dist_road <- apply(r_dist20.l, 1, min) # 1:20
+```
+
+##### Hyena to road
+```{r}
+# Creating a matrix of distances between observation points and the road buffer
+r_dist10.h <- spDists(hyena10, road_buffer) # 1:10
+r_dist15.h <- spDists(hyena15, road_buffer) # 1:15
+r_dist20.h <- spDists(hyena20, road_buffer) # 1:20
+
+# Creatng a new distance to road column, applying distances generated in matrix
+hyena10$dist_road <- apply(r_dist10.h, 1, min) # 1:10
+hyena15$dist_road <- apply(r_dist15.h, 1, min) # 1:15
+hyena20$dist_road <- apply(r_dist20.h, 1, min) # 1:20
+```
+
+***
+#### Extracting habitat type at each point
+
+```{r}
+# Fixing CRS
+proj4string(habitat) <- projection
+```
+
+##### Lions
+```{r}
+# Extracting cover type at each point
+l10_hab <- over(lion10, habitat) # 1:10
+l15_hab <- over(lion15, habitat) # 1:15
+l20_hab <- over(lion20, habitat) # 1:20
+```
+
+```{r}
+# Creating a new column called 'hab_type' with the character column from the extraction
+lion10$hab_type <- l10_hab[,2]
+lion15$hab_type <- l15_hab[,2]
+lion20$hab_type <- l20_hab[,2]
+```
+
+##### Hyenas
+```{r}
+# Extracting cover type at each point
+h10_hab <- over(hyena10, habitat) # 1:10
+h15_hab <- over(hyena15, habitat) # 1:15
+h20_hab <- over(hyena20, habitat) # 1:20
+```
+
+```{r}
+# Creating a new column called 'hab_type' with the character column from the extraction
+hyena10$hab_type <- h10_hab[,2]
+hyena15$hab_type <- h15_hab[,2]
+hyena20$hab_type <- h20_hab[,2]
+```
+
+***
+#### Calculating distance to the nearest competitor
+
+##### Converting shapefile data into data frame
+```{r}
+# Lions
+lion10 <- as.data.frame(lion10)
+lion15 <- as.data.frame(lion15)
+lion20 <- as.data.frame(lion20)
+
+# Hyenas
+hyena10 <- as.data.frame(hyena10)
+hyena15 <- as.data.frame(hyena15)
+hyena20 <- as.data.frame(hyena20)
+```
+
+##### Creating a new column in lion and hyena data
+```{r}
+# Adding new column called 'dist_comp'
+# Lions
+lion10$dist_comp <- NA
+lion15$dist_comp <- NA
+lion20$dist_comp <- NA
+
+# Hyenas
+hyena10$dist_comp <- NA
+hyena15$dist_comp <- NA
+hyena20$dist_comp <- NA
+```
+
+***
+##### Lions 1:10
+```{r}
+# Creating a date object
+dates <- unique(lion10$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  hyena.temp <- hyena10[hyena10$timestamp > (dates[i] - 60*60*12) & 
+                          hyena10$timestamp < (dates[i] + 60*60*12) & hyena10$Presence == 1 ,]
+  
+  if(nrow(hyena.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      lion10$dist_comp[i] <- min(sqrt((lion10$Easting[i] - hyena.temp$Easting)^2 + (lion10$Northing[i] - hyena.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    lion10$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
+
+##### Lions 1:15
+```{r}
+# Creating a date object
+dates <- unique(lion15$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  hyena.temp <- hyena15[hyena15$timestamp > (dates[i] - 60*60*12) & 
+                          hyena15$timestamp < (dates[i] + 60*60*12) & hyena15$Presence == 1 ,]
+  
+  if(nrow(hyena.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      lion15$dist_comp[i] <- min(sqrt((lion15$Easting[i] - hyena.temp$Easting)^2 + (lion15$Northing[i] - hyena.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    lion15$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
+
+##### Lions 1:20
+```{r}
+# Creating a date object
+dates <- unique(lion20$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  hyena.temp <- hyena20[hyena20$timestamp > (dates[i] - 60*60*12) & 
+                          hyena20$timestamp < (dates[i] + 60*60*12) & hyena20$Presence == 1 ,]
+  
+  if(nrow(hyena.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      lion20$dist_comp[i] <- min(sqrt((lion20$Easting[i] - hyena.temp$Easting)^2 + (lion20$Northing[i] - hyena.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    lion20$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
+
+***
+##### Hyenas 1:10
+```{r}
+# Creating a date object
+dates <- unique(hyena10$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  lion.temp <- lion10[lion10$timestamp > (dates[i] - 60*60*12) & 
+                          lion10$timestamp < (dates[i] + 60*60*12) & lion10$Presence == 1 ,]
+  
+  if(nrow(lion.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      hyena10$dist_comp[i] <- min(sqrt((hyena10$Easting[i] - lion.temp$Easting)^2 + (hyena10$Northing[i] - lion.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    hyena10$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
+
+##### Hyenas 1:15
+```{r}
+# Creating a date object
+dates <- unique(hyena15$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  lion.temp <- lion15[lion15$timestamp > (dates[i] - 60*60*12) & 
+                          lion15$timestamp < (dates[i] + 60*60*12) & lion15$Presence == 1 ,]
+  
+  if(nrow(lion.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      hyena15$dist_comp[i] <- min(sqrt((hyena15$Easting[i] - lion.temp$Easting)^2 + (hyena15$Northing[i] - lion.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    hyena15$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
+
+##### Hyenas 1:20
+```{r}
+# Creating a date object
+dates <- unique(hyena20$timestamp)
+for(i in 1:length(dates)){
+
+  # subset hyena within 12 hours of lion timestamps
+  lion.temp <- lion20[lion20$timestamp > (dates[i] - 60*60*12) & 
+                          lion20$timestamp < (dates[i] + 60*60*12) & lion20$Presence == 1 ,]
+  
+  if(nrow(lion.temp) > 0){
+      
+      # calculating minimum distance (meters) between lion and hyena - use Pythagoras
+      hyena20$dist_comp[i] <- min(sqrt((hyena20$Easting[i] - lion.temp$Easting)^2 + (hyena20$Northing[i] - lion.temp$Northing)^2 ), na.rm=T) 
+
+  } else{
+    
+    hyena20$dist_comp[i] = NA
+    }# end if loop
+} # end i loop
+```
