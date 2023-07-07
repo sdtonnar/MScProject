@@ -1,0 +1,178 @@
+---
+title: "Plotting"
+author: "Sarah Tonnar"
+date: "2023-07-07"
+output: html_document
+---
+
+```{r}
+
+model <- glmer(Presence ~ dist_water + dist_road + hab_type + Season + DayNight +
+                 (1|ID), family = binomial, data=lion15s)
+
+model2 <- glmer(Presence ~ dist_water + dist_road + hab_type + Season + DayNight +
+                  (1|ID), family = binomial, data=na.omit(hyena15s))
+
+print(lion.mod.final)
+
+```
+
+
+### Hypothesis 1
+
+```{r}
+
+#' Lions will select roads over dense vegetation
+mod1.lion <- glmer(Presence ~ dist_road:hab_type + dist_road:dist_comp + (1|ID), family=binomial, data=lion15s)
+
+#' Hyenas will select roads over dense vegetation
+mod1.hyena <- glmer(Presence ~ dist_road:hab_type + dist_road:dist_comp + (1|ID), family=binomial, data=hyena15s)
+
+set_theme(base = theme_light()) # setting colour theme of plot
+
+#' Both species will select roads over dense vegetation
+hyp1 <- plot_models(mod1.lion,
+            mod1.hyena,
+            std.est = NULL,
+            axis.labels = c("Distance to Road * Distance to Competitor", 
+                            "Distance to Road * Habitat [Thicket]",
+                            "Distance to Road * Habitat [Short Grass]",
+                            "Distance to Road * Habitat [Long Grass]",
+                            "Distance to Road * Habitat [Bush Clumps]"),
+            m.labels = c("Lions", "Hyenas"),
+            show.values = TRUE,
+            show.p = TRUE,
+            colors = c("darkorange3", "darkolivegreen4"),
+            legend.title = "",
+            grid = TRUE)
+
+# Visual summary of lion model
+summary(mod1.lion)
+
+# Hyenas will avoid roads when lions are present
+plot2 <- ggplot() +
+          geom_smooth(data=lion15, aes(x=dist_comp, y=dist_road), 
+              colour = DayNight) + # lions
+          geom_smooth(data=hyena15, aes(x=dist_comp, y=dist_road), 
+              colour = DayNight) +
+  facet_grid(~DayNight) +
+          labs(x = "Distance to Nearest Competitor (metres)",
+          y = "Distance to the nearest road (metres)")
+
+```
+
+### Hypothesis 2
+
+```{r}
+
+#' Lions habitat selection won't be affected by nearest competitor
+mod3.lion <- glmer(Presence ~ dist_comp + hab_type + dist_comp:hab_type + (1|ID), 
+                   family=binomial, data=lion15s)
+
+#' Hyena habitat selection will be affected by nearest competitor
+mod3.hyena <- glmer(Presence ~ dist_comp:hab_type + (1|ID), 
+                   family=binomial, data=hyena15s)
+
+hyp2 <- plot_models(mod3.lion,
+                    mod3.hyena,
+                    std.est = TRUE,
+                    show.p = TRUE,
+                    m.labels = c("Lions", "Hyenas"),
+                    axis.labels = c("Distance to Competitor * Habitat [Thicket]", 
+                                    "Distance to Competitor * Habitat [Short Grass]",
+                                    "Distance to Competitor * Habitat [Long Grass]",
+                                    "Distance to Competitor * Habitat [Bush Clumps]"),
+                    colors = c("darkorange3", "darkolivegreen4"),
+                    show.values = TRUE,
+                    legend.title = "",
+                    grid=TRUE)
+
+summary(mod3.hyena)
+summary(mod3.lion)
+
+```
+
+### Hypothesis 3
+
+```{r}
+
+#' Lions will use the roads more during the day, the hyenas more at night
+
+mod4.lion <- glmer(Presence ~ dist_road:DayNight + dist_comp:DayNight + (1|ID), family=binomial,
+                   data=lion15s)
+mod4.hyena <- glmer(Presence ~ dist_road:DayNight + dist_comp:DayNight + (1|ID), family=binomial,
+                   data=hyena15s)
+
+hyp3 <- plot_models(mod4.lion,
+                    mod4.hyena,
+                    std.est = TRUE,
+                    show.p = TRUE,
+                    m.labels = c("Lions", "Hyenas"),
+                    axis.labels = c("Distance to Competitor * DayNight [Night]",
+                                    "Distance to Competitor * DayNight [Day]",
+                                    "Distance to Road * DayNight [Night]",
+                                    "Distance to Road * DayNight [Day]"),
+                    colors = c("darkorange3", "darkolivegreen4"),
+                    show.values = TRUE,
+                    legend.title = "",
+                    grid=TRUE)
+
+lion.sum <- summary(lion.mod.final)
+hyena.sum <- summary(hyena.mod.final)
+
+
+mod.habroad <- glmer(Presence ~ dist_road:Season +  hab_type:Season + (1|ID),
+                     family = binomial, data=lion15s)
+
+mod.habroad2 <- glmer(Presence ~ dist_road:Season +  hab_type:Season + (1|ID),
+                      family = binomial, data=hyena15s)
+
+summary(mod.habroad2)
+
+```
+
+```{r}
+
+lion.mod <- glmer(Presence ~ dist_comp + dist_road + hab_type + dist_road:hab_type +
+                    dist_road:dist_comp + dist_comp:hab_type + dist_road:DayNight +
+                    dist_comp:DayNight + dist_road:Season + hab_type:Season +
+                    dist_water:dist_comp + (1|ID), family = binomial, data=lion15s)
+
+hyena.mod <- glmer(Presence ~ dist_comp + dist_road + hab_type + dist_road:hab_type +
+                     dist_road:dist_comp + dist_comp:hab_type + dist_road:DayNight +
+                     dist_comp:DayNight + dist_road:Season + hab_type:Season +
+                     dist_water:dist_comp + (1|ID), family = binomial, data=hyena15s)
+
+```
+
+```{r}
+
+lion.mod.fig <- plot_model(lion.mod,
+                           std.est = TRUE,
+                           show.p = TRUE,
+                           show.values = TRUE)
+
+
+lhyena.mod.fig <- plot_model(hyena.mod)
+
+```
+
+```{r}
+
+hyp3 <- plot_models(mod4.lion,
+                    mod4.hyena,
+                    std.est = TRUE,
+                    show.p = TRUE,
+                    m.labels = c("Lions", "Hyenas"),
+                    axis.labels = c("Distance to Competitor * DayNight [Night]",
+                                    "Distance to Competitor * DayNight [Day]",
+                                    "Distance to Road * DayNight [Night]",
+                                    "Distance to Road * DayNight [Day]"),
+                    colors = c("darkorange3", "darkolivegreen4"),
+                    show.values = TRUE,
+                    legend.title = "",
+                    grid=TRUE)
+
+```
+
+
