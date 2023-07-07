@@ -1,0 +1,759 @@
+---
+title: "Organising_Data"
+author: "Sarah Tonnar"
+date: "07/07/2023"
+output: html_document
+---
+
+```{r, include = FALSE}
+
+source("~/Documents/Research Paper/Analysis/MScProject/RDT_Function.R") # Random date function
+source("~/Documents/Research Paper/Analysis/MScProject/Season.DayNight_Function.R") # Season & DayNight function
+source("~/Documents/Research Paper/Analysis/MScProject/Clip_Function.R") # Boundary clip function
+source("~/Documents/Research Paper/Analysis/MScProject/Random_Pts_Function.R") # Random Points
+source("~/Documents/Research Paper/Analysis/MScProject/Organising_shapefiles.R") # Shapefiles
+
+```
+
+***
+## Loading in CSV files
+***
+
+```{r}
+
+aardlam <- read.csv("Data/Input/Lions/Aardlam.csv")
+bitterbal <- read.csv("Data/Input/Lions/Bitterbal.csv")
+kalahari <- read.csv("Data/Input/Lions/Kalahari.csv")
+kamqua <- read.csv("Data/Input/Lions/Kamqua.csv")
+nossob <- read.csv("Data/Input/Lions/Nossob.csv")
+tsama <- read.csv("Data/Input/Lions/Tsama.csv")
+
+```
+
+```{r}
+
+coca <- read.csv("Data/Input/Hyena/Coca.csv")
+floppy <- read.csv("Data/Input/Hyena/Floppy.csv")
+gus <- read.csv("Data/Input/Hyena/Gus.csv")
+kruuk <- read.csv("Data/Input/Hyena/Kruuk.csv")
+madikwe <- read.csv("Data/Input/Hyena/Madikwe.csv")
+shingwedzi <- read.csv("Data/Input/Hyena/Shingwedzi.csv")
+
+```
+
+***
+### Lions - Reformatting / Cropping Data
+***
+
+#### Aardlam
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+aardlam$timestamp <- as.POSIXct(paste(aardlam$Date, aardlam$Time),
+                                format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "X", "X.1", "X.2", "X.3", "X.4", "X.5", "X.6",
+          "Day.Night", "Individual", "Season")
+aardlam <- aardlam[,!(names(aardlam)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+aardlam <- distinct(aardlam)
+
+# Adding presence points
+aardlam$Presence <- '1'
+
+# Removing NAs
+aardlam <- na.omit(aardlam)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+aardlam <- clip(aardlam, boundary, projection)
+
+# Returning SPDF back to a data frame
+aardlam <- as.data.frame(aardlam)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2003-12-08"
+et <- "2005-12-10"
+# Creating random points data frame
+aardlam10 <- rand_pts(aardlam, boundary, 10) # 1:10
+aardlam15 <- rand_pts(aardlam, boundary, 15) # 1:15
+aardlam20 <- rand_pts(aardlam, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+aardlam10 <- rbind(aardlam, aardlam10)
+aardlam15 <- rbind(aardlam, aardlam15)
+aardlam20 <- rbind(aardlam, aardlam20)
+
+# Adding an ID column by animal name
+aardlam10$ID <- "Aardlam"
+aardlam15$ID <- "Aardlam"
+aardlam20$ID <- "Aardlam"
+
+# Reordering columns
+aardlam10 <- aardlam10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+aardlam15 <- aardlam15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+aardlam20 <- aardlam20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Bitterbal
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+bitterbal$timestamp <- as.POSIXct(paste(bitterbal$Date, bitterbal$Time),
+                                format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night","Season", "Individual")
+bitterbal <- bitterbal[,!(names(bitterbal)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+bitterbal <- distinct(bitterbal)
+
+# Adding presence points
+bitterbal$Presence <- '1'
+
+# Removing NAs
+bitterbal <- na.omit(bitterbal)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+bitterbal <- clip(bitterbal, boundary, projection)
+
+# Returning SPDF back to a data frame
+bitterbal <- as.data.frame(bitterbal)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2003-12-08"
+et <- "2005-11-27"
+# Creating random points data frame
+bitterbal10 <- rand_pts(bitterbal, boundary, 10) # 1:10
+bitterbal15 <- rand_pts(bitterbal, boundary, 15) # 1:15
+bitterbal20 <- rand_pts(bitterbal, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+bitterbal10 <- rbind(bitterbal, bitterbal10)
+bitterbal15 <- rbind(bitterbal, bitterbal15)
+bitterbal20 <- rbind(bitterbal, bitterbal20)
+
+# Adding an ID column by animal name
+bitterbal10$ID <- "Bitterbal"
+bitterbal15$ID <- "Bitterbal"
+bitterbal20$ID <- "Bitterbal"
+
+# Reordering columns
+bitterbal10 <- bitterbal10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+bitterbal15 <- bitterbal15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+bitterbal20 <- bitterbal20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Kalahari
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+kalahari$timestamp <- as.POSIXct(paste(kalahari$Date, kalahari$Time),
+                                  format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Season", "Individual")
+kalahari <- kalahari[,!(names(kalahari)%in%drop)]
+
+# Renaming columns to match other data sets
+kalahari <- rename(kalahari, Easting = Longitude, Northing = Latitude)
+
+# Removing duplicate rows based on timestamp
+kalahari <- distinct(kalahari)
+
+# Adding presence points
+kalahari$Presence <- '1'
+
+# Removing NAs
+kalahari <- na.omit(kalahari)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+kalahari <- clip(kalahari, boundary, projection)
+
+# Returning SPDF back to a data frame
+kalahari <- as.data.frame(kalahari)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2003-01-11"
+et <- "2004-12-03"
+# Creating random points data frame
+kalahari10 <- rand_pts(kalahari, boundary, 10) # 1:10
+kalahari15 <- rand_pts(kalahari, boundary, 15) # 1:15
+kalahari20 <- rand_pts(kalahari, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+kalahari10 <- rbind(kalahari, kalahari10)
+kalahari15 <- rbind(kalahari, kalahari15)
+kalahari20 <- rbind(kalahari, kalahari20)
+
+# Adding an ID column by animal name
+kalahari10$ID <- "Kalahari"
+kalahari15$ID <- "Kalahari"
+kalahari20$ID <- "Kalahari"
+
+# Reordering columns
+kalahari10 <- kalahari10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kalahari15 <- kalahari15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kalahari20 <- kalahari20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Kamqua
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+kamqua$timestamp <- as.POSIXct(paste(kamqua$Date, kamqua$Time),
+                                 format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night", "Season", "Individual")
+kamqua <- kamqua[,!(names(kamqua)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+kamqua <- distinct(kamqua)
+
+# Adding presence points
+kamqua$Presence <- '1'
+
+# Removing NAs
+kamqua <- na.omit(kamqua)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+kamqua <- clip(kamqua, boundary, projection)
+
+# Returning SPDF back to a data frame
+kamqua <- as.data.frame(kamqua)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2003-01-11"
+et <- "2005-12-11"
+# Creating random points data frame
+kamqua10 <- rand_pts(kamqua, boundary, 10) # 1:10
+kamqua15 <- rand_pts(kamqua, boundary, 15) # 1:15
+kamqua20 <- rand_pts(kamqua, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+kamqua10 <- rbind(kamqua, kamqua10)
+kamqua15 <- rbind(kamqua, kamqua15)
+kamqua20 <- rbind(kamqua, kamqua20)
+
+# Adding an ID column by animal name
+kamqua10$ID <- "Kamqua"
+kamqua15$ID <- "Kamqua"
+kamqua20$ID <- "Kamqua"
+
+# Reordering columns
+kamqua10 <- kamqua10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kamqua15 <- kamqua15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kamqua20 <- kamqua20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Nossob
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+nossob$timestamp <- as.POSIXct(paste(nossob$Date, nossob$Time),
+                               format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night", "Season", "Observed.individual")
+nossob <- nossob[,!(names(nossob)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+nossob <- distinct(nossob)
+
+# Adding presence points
+nossob$Presence <- '1'
+
+# Removing NAs
+nossob <- na.omit(nossob)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+nossob <- clip(nossob, boundary, projection)
+
+# Returning SPDF back to a data frame
+nossob <- as.data.frame(nossob)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-01-01"
+et <- "2005-12-07"
+# Creating random points data frame
+nossob10 <- rand_pts(nossob, boundary, 10) # 1:10
+nossob15 <- rand_pts(nossob, boundary, 15) # 1:15
+nossob20 <- rand_pts(nossob, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+nossob10 <- rbind(nossob, nossob10)
+nossob15 <- rbind(nossob, nossob15)
+nossob20 <- rbind(nossob, nossob20)
+
+# Adding an ID column by animal name
+nossob10$ID <- "Nossob"
+nossob15$ID <- "Nossob"
+nossob20$ID <- "Nossob"
+
+# Reordering columns
+nossob10 <- nossob10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+nossob15 <- nossob15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+nossob20 <- nossob20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Tsama
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+tsama$timestamp <- as.POSIXct(paste(tsama$Date, tsama$Time),
+                               format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.night", "Season", "Observed.individual")
+tsama <- tsama[,!(names(tsama)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+tsama <- distinct(tsama)
+
+# Adding presence points
+tsama$Presence <- '1'
+
+# Removing NAs
+tsama <- na.omit(tsama)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+tsama <- clip(tsama, boundary, projection)
+
+# Returning SPDF back to a data frame
+tsama <- as.data.frame(tsama)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2003-12-10"
+et <- "2005-11-27"
+# Creating random points data frame
+tsama10 <- rand_pts(tsama, boundary, 10) # 1:10
+tsama15 <- rand_pts(tsama, boundary, 15) # 1:15
+tsama20 <- rand_pts(tsama, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+tsama10 <- rbind(tsama, tsama10)
+tsama15 <- rbind(tsama, tsama15)
+tsama20 <- rbind(tsama, tsama20)
+
+
+# Adding an ID column by animal name
+tsama10$ID <- "Tsama"
+tsama15$ID <- "Tsama"
+tsama20$ID <- "Tsama"
+
+# Reordering columns
+tsama10 <- tsama10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+tsama15 <- tsama15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+tsama20 <- tsama20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+#### Binding datasets together
+
+```{r, include = FALSE}
+
+# Binding data sets with 1:10 random point ratio into one called 'lion10'
+lion10 <- rbind(aardlam10, bitterbal10, kalahari10, kamqua10, nossob10, tsama10)
+
+# Binding data sets with 1:15 random point ratio into one called 'lion15'
+lion15 <- rbind(aardlam15, bitterbal15, kalahari15, kamqua15, nossob15, tsama15)
+
+# Binding data sets with 1:20 random point ratio into one called 'lion20'
+lion20 <- rbind(aardlam20, bitterbal20, kalahari20, kamqua20, nossob20, tsama20)
+
+```
+
+
+
+***
+### Hyenas - Reformatting / Cropping Data
+***
+
+#### Coca
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+coca$timestamp <- as.POSIXct(paste(coca$Date, coca$Time),
+                                format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night", "Season", "Observed.individual")
+coca <- coca[,!(names(coca)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+coca <- distinct(coca)
+
+# Adding presence points
+coca$Presence <- '1'
+
+# Removing NAs
+coca <- na.omit(coca)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+coca <- clip(coca, boundary, projection)
+
+# Returning SPDF back to a data frame
+coca <- as.data.frame(coca)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-10-14"
+et <- "2005-09-26"
+# Creating random points data frame
+coca10 <- rand_pts(coca, boundary, 10) # 1:10
+coca15 <- rand_pts(coca, boundary, 15) # 1:15
+coca20 <- rand_pts(coca, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+coca10 <- rbind(coca, coca10)
+coca15 <- rbind(coca, coca15)
+coca20 <- rbind(coca, coca20)
+
+# Adding an ID column by animal name
+coca10$ID <- "Coca"
+coca15$ID <- "Coca"
+coca20$ID <- "Coca"
+
+# Reordering columns
+coca10 <- coca10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+coca15 <- coca15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+coca20 <- coca20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Floppy
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+floppy$timestamp <- as.POSIXct(paste(floppy$Date, floppy$Time),
+                                format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night","Season", "Observed.individual")
+floppy <- floppy[,!(names(floppy)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+floppy <- distinct(floppy)
+
+# Adding presence points
+floppy$Presence <- '1'
+
+# Removing NAs
+floppy <- na.omit(floppy)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+floppy <- clip(floppy, boundary, projection)
+
+# Returning SPDF back to a data frame
+floppy <- as.data.frame(floppy)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-02-18"
+et <- "2005-06-20"
+# Creating random points data frame
+floppy10 <- rand_pts(floppy, boundary, 10) # 1:10
+floppy15 <- rand_pts(floppy, boundary, 15) # 1:15
+floppy20 <- rand_pts(floppy, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+floppy10 <- rbind(floppy, floppy10)
+floppy15 <- rbind(floppy, floppy15)
+floppy20 <- rbind(floppy, floppy20)
+
+# Adding an ID column by animal name
+floppy10$ID <- "Floppy"
+floppy15$ID <- "Floppy"
+floppy20$ID <- "Floppy"
+
+# Reordering columns
+floppy10 <- floppy10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+floppy15 <- floppy15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+floppy20 <- floppy20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Gus
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+gus$timestamp <- as.POSIXct(paste(gus$Date, gus$Time),
+                                  format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Season", "Observed.individual")
+gus <- gus[,!(names(gus)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+gus <- distinct(gus)
+
+# Adding presence points
+gus$Presence <- '1'
+
+# Removing NAs
+gus <- na.omit(gus)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+gus <- clip(gus, boundary, projection)
+
+# Returning SPDF back to a data frame
+gus <- as.data.frame(gus)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-03-21"
+et <- "2005-10-17"
+# Creating random points data frame
+gus10 <- rand_pts(gus, boundary, 10) # 1:10
+gus15 <- rand_pts(gus, boundary, 15) # 1:15
+gus20 <- rand_pts(gus, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+gus10 <- rbind(gus, gus10)
+gus15 <- rbind(gus, gus15)
+gus20 <- rbind(gus, gus20)
+
+# Adding an ID column by animal name
+gus10$ID <- "Gus"
+gus15$ID <- "Gus"
+gus20$ID <- "Gus"
+
+# Reordering columns
+gus10 <- gus10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+gus15 <- gus15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+gus20 <- gus20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Kruuk
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+kruuk$timestamp <- as.POSIXct(paste(kruuk$Date, kruuk$Time),
+                                 format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Season", "Observed.individual")
+kruuk <- kruuk[,!(names(kruuk)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+kruuk <- distinct(kruuk)
+
+# Adding presence points
+kruuk$Presence <- '1'
+
+# Removing NAs
+kruuk <- na.omit(kruuk)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+kruuk <- clip(kruuk, boundary, projection)
+
+# Returning SPDF back to a data frame
+kruuk <- as.data.frame(kruuk)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-01-07"
+et <- "2005-08-08"
+# Creating random points data frame
+kruuk10 <- rand_pts(kruuk, boundary, 10) # 1:10
+kruuk15 <- rand_pts(kruuk, boundary, 15) # 1:15
+kruuk20 <- rand_pts(kruuk, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+kruuk10 <- rbind(kruuk, kruuk10)
+kruuk15 <- rbind(kruuk, kruuk15)
+kruuk20 <- rbind(kruuk, kruuk20)
+
+# Adding an ID column by animal name
+kruuk10$ID <- "Kruuk"
+kruuk15$ID <- "Kruuk"
+kruuk20$ID <- "Kruuk"
+
+# Reordering columns
+kruuk10 <- kruuk10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kruuk15 <- kruuk15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+kruuk20 <- kruuk20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Madikwe
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+madikwe$timestamp <- as.POSIXct(paste(madikwe$Date, madikwe$Time),
+                               format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "Day.Night", "Season", "Observed.individual")
+madikwe <- madikwe[,!(names(madikwe)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+madikwe <- distinct(madikwe)
+
+# Adding presence points
+madikwe$Presence <- '1'
+
+# Removing NAs
+madikwe <- na.omit(madikwe)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+madikwe <- clip(madikwe, boundary,projection)
+
+# Returning SPDF back to a data frame
+madikwe <- as.data.frame(madikwe)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-01-07"
+et <- "2005-11-24"
+# Creating random points data frame
+madikwe10 <- rand_pts(madikwe, boundary, 10) # 1:10
+madikwe15 <- rand_pts(madikwe, boundary, 15) # 1:15
+madikwe20 <- rand_pts(madikwe, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+madikwe10 <- rbind(madikwe, madikwe10)
+madikwe15 <- rbind(madikwe, madikwe15)
+madikwe20 <- rbind(madikwe, madikwe20)
+
+# Adding an ID column by animal name
+madikwe10$ID <- "Madikwe"
+madikwe15$ID <- "Madikwe"
+madikwe20$ID <- "Madikwe"
+
+# Reordering columns
+madikwe10 <- madikwe10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+madikwe15 <- madikwe15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+madikwe20 <- madikwe20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+
+#### Shingwedzi
+```{r, include = FALSE}
+
+# Convert into POSIX format time and date
+shingwedzi$timestamp <- as.POSIXct(paste(shingwedzi$Date, shingwedzi$Time),
+                               format = "%d/%m/%Y %H:%M")
+
+# Dropping separate date and time and unused columns from the data frame
+drop <- c("Date", "Time", "X", "Season", "Individual")
+shingwedzi <- shingwedzi[,!(names(shingwedzi)%in%drop)]
+
+# Removing duplicate rows based on timestamp
+shingwedzi <- distinct(shingwedzi)
+
+# Adding presence points
+shingwedzi$Presence <- '1'
+
+# Removing NAs
+shingwedzi <- na.omit(shingwedzi)
+
+# Using the 'clip' function we created to transform the data frame into a SPDF and crop within the boundary
+shingwedzi <- clip(shingwedzi, boundary, projection)
+
+# Returning SPDF back to a data frame
+shingwedzi <- as.data.frame(shingwedzi)
+
+```
+
+```{r, include=FALSE}
+
+# Setting start and end time range
+st <- "2004-01-10"
+et <- "2005-12-11"
+# Creating random points data frame
+shingwedzi10 <- rand_pts(shingwedzi, boundary, 10) # 1:10
+shingwedzi15 <- rand_pts(shingwedzi, boundary, 15) # 1:15
+shingwedzi20 <- rand_pts(shingwedzi, boundary, 20) # 1:20
+
+# Combining random point data frames to observation point data frames
+shingwedzi10 <- rbind(shingwedzi, shingwedzi10)
+shingwedzi15 <- rbind(shingwedzi, shingwedzi15)
+shingwedzi20 <- rbind(shingwedzi, shingwedzi20)
+
+# Adding an ID column by animal name
+shingwedzi10$ID <- "Shingwedzi"
+shingwedzi15$ID <- "Shingwedzi"
+shingwedzi20$ID <- "Shingwedzi"
+
+# Reordering columns
+shingwedzi10 <- shingwedzi10[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+shingwedzi15 <- shingwedzi15[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+shingwedzi20 <- shingwedzi20[, c("Presence", "ID", "Easting", "Northing", "timestamp")]
+
+```
+
+#### Binding datasets together
+
+```{r, include = FALSE}
+
+# Binding data sets with 1:10 random point ratio into one called 'hyena10'
+hyena10 <- rbind(coca10, floppy10, gus10, kruuk10, madikwe10, shingwedzi10)
+
+# Binding data sets with 1:15 random point ratio into one called 'hyena15'
+hyena15 <- rbind(coca15, floppy15, gus15, kruuk15, madikwe15, shingwedzi15)
+
+# Binding data sets with 1:20 random point ratio into one called 'hyena20'
+hyena20 <- rbind(coca20, floppy20, gus20, kruuk20, madikwe20, shingwedzi20)
+
+```
+
+
