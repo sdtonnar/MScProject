@@ -41,14 +41,14 @@ library(zoo)
 library(lmtest)
 ```
 
-Then, it is recommended that the following functions are run before any other part of code:
+Then, it is recommended that the following scripts are run before any other part of code:
 
 - 'Clip_Function.R'
 - 'RDT_Function.R'
 - 'RandomPoints_Function.R'
 - 'Season.DayNight_Function.R'
 
-If the function scripts are not run prior to the rest of the code, you will encounter errors.
+The code is dependent on these function scripts, so if they are not run prior, you will encounter errors.
 
 ## Data
 
