@@ -1,0 +1,582 @@
+---
+title: "Lion Modelling"
+author: "Sarah Tonnar"
+date: "07/07/2023"
+output: html_document
+---
+
+## Lion Models
+
+### Changing the class of the 'Presence' column
+```{r}
+lion10$Presence <- as.integer(lion10$Presence)
+lion15$Presence <- as.integer(lion15$Presence)
+lion20$Presence <- as.integer(lion20$Presence)
+```
+
+### Rescaling numeric variables around 0
+```{r}
+
+lion10s <- lion10
+lion15s <- lion15
+lion20s <- lion20
+
+# Lion 1:10
+lion10s$dist_water <- scale(lion10$dist_water)
+lion10s$dist_road <- scale(lion10$dist_road)
+lion10s$dist_comp <- scale(lion10$dist_comp)
+
+# Lion 1:15
+lion15s$dist_water <- scale(lion15$dist_water)
+lion15s$dist_road <- scale(lion15$dist_road)
+lion15s$dist_comp <- scale(lion15$dist_comp)
+
+# Lion 1:20
+lion20s$dist_water <- scale(lion20$dist_water)
+lion20s$dist_road <- scale(lion20$dist_road)
+lion20s$dist_comp <- scale(lion20$dist_comp)
+```
+
+### Variables Only
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+lion10mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(lion10s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+lion15mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(lion15s))
+```
+
+```{r}
+# Creating a model with all variables in it and ID as a random effect for 1:15
+lion20mod <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + (1|ID),
+                    family=binomial, data = na.omit(lion20s))
+```
+
+#### Removing dist_water
+```{r}
+lion10mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion10s))
+```
+
+```{r}
+lion15mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion15s))
+```
+
+```{r}
+lion20mod1 <- glmer(Presence ~ dist_road + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10mod1, lion10mod)
+lrtest(lion15mod1, lion15mod)
+lrtest(lion20mod1, lion20mod)
+
+# P < 0.05 - we will keep dist_water in the model
+```
+
+#### Removing dist_road
+```{r}
+lion10mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion10s))
+```
+
+```{r}
+lion15mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion15s))
+```
+
+```{r}
+lion20mod2 <- glmer(Presence ~ dist_water + hab_type + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10mod2, lion10mod)
+lrtest(lion15mod2, lion15mod)
+lrtest(lion20mod2, lion20mod)
+
+# P < 0.05 - we will keep dist_road in the model
+```
+
+#### Removing hab_type
+```{r}
+lion10mod3 <- glmer(Presence ~ dist_water + dist_road + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion10s))
+```
+
+```{r}
+lion15mod3 <- glmer(Presence ~ dist_water + dist_road + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion15s))
+```
+
+```{r}
+lion20mod3 <- glmer(Presence ~ dist_water + dist_road + dist_comp + (1|ID), family=binomial,
+                    data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10mod3, lion10mod)
+lrtest(lion15mod3, lion15mod)
+lrtest(lion20mod3, lion20mod)
+
+# P < 0.05 - we will keep hab_type in the model
+```
+
+#### Removing dist_comp
+```{r}
+lion10mod4 <- glmer(Presence ~ dist_water + dist_road + hab_type + (1|ID), family=binomial,
+                    data=na.omit(lion10s))
+```
+
+```{r}
+lion15mod4 <- glmer(Presence ~ dist_water + dist_road + hab_type + (1|ID), family=binomial,
+                    data=na.omit(lion15s))
+```
+
+```{r}
+lion20mod4 <- glmer(Presence ~ dist_water + dist_road + hab_type + (1|ID), family=binomial,
+                    data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10mod4, lion10mod)
+lrtest(lion15mod4, lion15mod)
+lrtest(lion20mod4, lion20mod)
+
+# P < 0.05 - we will keep dist_comp in the model
+```
+
+## Adding interactions
+
+#### Adding Season:dist_water
+```{r}
+lion10season <- glmer(Presence ~ dist_water + dist_road + hab_type + Season:dist_water +
+                        dist_comp + (1|ID), family=binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season <- glmer(Presence ~ dist_water + dist_road + hab_type + Season:dist_water +
+                        dist_comp + (1|ID), family=binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season <- glmer(Presence ~ dist_water + dist_road + hab_type + Season:dist_water +
+                       dist_comp +  (1|ID), family=binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10mod, lion10season)
+lrtest(lion15mod, lion15season)
+lrtest(lion20mod, lion20season)
+
+# P < 0.05 - keep Season:dist_water in the model
+```
+
+#### Adding Season:dist_road
+```{r}
+lion10season1 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + (1|ID), family=binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season1 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + (1|ID), family=binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season1 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + (1|ID), family=binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season, lion10season1)
+lrtest(lion15season, lion15season1)
+lrtest(lion20season, lion20season1)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding Season:hab_type
+```{r}
+lion10season2 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion10s))
+```
+
+```{r}
+lion15season2 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion15s))
+```
+
+```{r}
+lion20season2 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season1, lion10season2)
+lrtest(lion15season1, lion15season2)
+lrtest(lion20season1, lion20season2)
+
+# P < 0.05 - keep Season:hab_type in the model
+```
+
+#### Adding Season:dist_comp
+```{r}
+lion10season3 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + (1|ID),
+                       family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season3 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + (1|ID),
+                       family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season3 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + (1|ID),
+                       family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season2, lion10season3)
+lrtest(lion15season2, lion15season3)
+lrtest(lion20season2, lion20season3)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding DayNight:dist_water
+```{r}
+lion10season4 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_water +
+                         (1|ID), family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season4 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_water +
+                         (1|ID), family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season4 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_water +
+                         (1|ID), family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season3, lion10season4)
+lrtest(lion15season3, lion15season4)
+lrtest(lion15season3, lion15season4)
+
+# P > 0.05 - remove from model
+```
+
+#### Adding DayNight:dist_road
+```{r}
+lion10season5 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         (1|ID), family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season5 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         (1|ID), family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season5 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         (1|ID), family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season3, lion10season5)
+lrtest(lion15season3, lion15season5)
+lrtest(lion20season3, lion20season5)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding DayNight:hab_type
+```{r}
+lion10season6 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:hab_type + (1|ID), family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season6 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:hab_type + (1|ID), family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season6 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:hab_type + (1|ID), family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season5, lion10season6)
+lrtest(lion15season5, lion15season6)
+lrtest(lion20season5, lion20season6)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding DayNight:dist_comp
+```{r}
+lion10season7 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:dist_comp + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion10s))
+```
+
+```{r}
+lion15season7 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:dist_comp + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion15s))
+```
+
+```{r}
+lion20season7 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         DayNight:dist_comp + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season6, lion10season7)
+lrtest(lion15season6, lion15season7)
+lrtest(lion20season6, lion20season7)
+
+# P > 0.05 - remove from model
+```
+
+#### Adding dist_water:dist_road
+```{r}
+lion10season8 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion10s))
+```
+
+```{r}
+lion15season8 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion15s))
+```
+
+```{r}
+lion20season8 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + (1|ID), family = binomial,
+                       data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season6, lion10season8)
+lrtest(lion15season6, lion15season8)
+lrtest(lion20season6, lion20season8)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding dist_water:hab_type
+```{r}
+lion10season9 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + (1|ID), 
+                       family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season9 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + (1|ID), 
+                       family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season9 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + (1|ID), 
+                       family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season8, lion10season9)
+lrtest(lion15season8, lion15season9)
+lrtest(lion20season8, lion20season9)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding dist_water:dist_comp
+```{r}
+lion10season10 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + (1|ID),family = binomial, data=na.omit(lion10s))
+```
+
+```{r}
+lion15season10 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + (1|ID),family = binomial, data=na.omit(lion15s))
+```
+
+```{r}
+lion20season10 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + (1|ID),family = binomial, data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season9, lion10season10)
+lrtest(lion15season9, lion15season10)
+lrtest(lion20season9, lion20season10)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding dist_road:hab_type
+```{r}
+lion10season11 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + (1|ID), family = binomial,
+                        data=na.omit(lion10s))
+```
+
+```{r}
+lion15season11 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + (1|ID), family = binomial,
+                        data=na.omit(lion15s))
+```
+
+```{r}
+lion20season11 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + (1|ID), family = binomial,
+                        data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season10, lion10season11)
+lrtest(lion15season10, lion15season11)
+lrtest(lion20season10, lion20season11)
+
+# P < 0.05 - keep in model
+```
+
+#### Adding dist_road:dist_comp
+```{r}
+lion10season12 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + dist_road:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion10s))
+```
+
+```{r}
+lion15season12 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + dist_road:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion15s))
+```
+
+```{r}
+lion20season12 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + dist_road:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season11, lion10season12)
+lrtest(lion15season11, lion15season12)
+lrtest(lion20season11, lion20season12)
+
+# P > 0.05 - remove from model
+```
+
+#### Adding hab_type:dist_comp
+```{r}
+lion10season13 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + hab_type:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion10s))
+```
+
+```{r}
+lion15season13 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + hab_type:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion15s))
+```
+
+```{r}
+lion20season13 <- glmer(Presence ~ dist_water + dist_road + hab_type + dist_comp + Season:dist_water +
+                         Season:dist_road + Season:hab_type + Season:dist_comp + DayNight:dist_road +
+                         dist_water:dist_road + DayNight:hab_type + dist_water:hab_type + 
+                         dist_water:dist_comp + dist_road:hab_type + hab_type:dist_comp + (1|ID), 
+                        family = binomial,data=na.omit(lion20s))
+```
+
+```{r}
+# Doing an LRT test
+lrtest(lion10season11, lion10season13)
+lrtest(lion15season11, lion15season13)
+lrtest(lion20season11, lion20season13)
+
+# P > 0.05 - remove from the model
+```
+
+## Setting final model
+```{r}
+# Using 1:15 random point ratio as results were consistent with this number
+lion.mod.final <- lion15season11
+```
