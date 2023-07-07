@@ -14,7 +14,9 @@ The project utilises a data-driven approach to build a model that predicts the r
 
 2. Clone the repository using the following command:
 
+```{r}
 git clone https://github.com/sdtonnar/MScProject.git
+```
 
 ## Usage
 
